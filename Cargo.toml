@@ -1,0 +1,9 @@
+[package]
+name = "spd2010"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+critical-section = "1.2.0"
+embedded-hal = "1.0.0"
+heapless = "0.9.1"
