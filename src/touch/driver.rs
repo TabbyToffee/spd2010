@@ -244,7 +244,7 @@ pub async fn reset<D: DelayNs, P: OutputPin>(
     delay: &mut D,
     reset_pin: &mut P,
 ) -> Result<(), P::Error> {
-    reset_pin.set_high()?;
+    // reset_pin.set_high()?;
     delay.delay_ms(50);
     reset_pin.set_low()?;
     delay.delay_ms(50);

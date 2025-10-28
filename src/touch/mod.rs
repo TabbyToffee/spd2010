@@ -3,7 +3,7 @@ pub mod io;
 
 pub use driver::reset;
 
-use core::cell::RefCell;
+use core::{cell::RefCell, fmt};
 
 use critical_section::Mutex;
 use embedded_hal::i2c::I2c;
@@ -15,7 +15,7 @@ const SPD2010_MAX_TOUCH_POINTS: usize = 10;
 #[derive(Debug)]
 pub enum Error<I2C: I2c> {
     I2C(I2C::Error),
-    InterruptStayedHigh,
+    ClearInterruptFailed,
 }
 
 // All touches and gesture info
@@ -99,7 +99,7 @@ impl<'a, I2C: I2c, Ti: InterruptInput> SPD2010Touch<'a, I2C, Ti> {
                 .borrow_ref_mut(cs)
                 .as_mut()
                 .unwrap()
-                .clear_interrupt();
+                .clear_interrupt_flag();
         });
     }
 
@@ -109,12 +109,23 @@ impl<'a, I2C: I2c, Ti: InterruptInput> SPD2010Touch<'a, I2C, Ti> {
                 .borrow_ref(cs)
                 .as_ref()
                 .unwrap()
-                .get_interrupt()
+                .get_interrupt_flag()
+        })
+    }
+
+    fn get_interrupt_state(&self) -> bool {
+        critical_section::with(|cs| {
+            self.touch_interrupt
+                .borrow_ref(cs)
+                .as_ref()
+                .unwrap()
+                .get_interrupt_state()
         })
     }
 }
 
 pub trait InterruptInput {
-    fn get_interrupt(&self) -> bool;
-    fn clear_interrupt(&mut self);
+    fn get_interrupt_flag(&self) -> bool;
+    fn clear_interrupt_flag(&mut self);
+    fn get_interrupt_state(&self) -> bool;
 }

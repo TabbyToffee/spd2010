@@ -40,6 +40,10 @@ impl<'a, I2C: I2c, Ti: InterruptInput> SPD2010Touch<'a, I2C, Ti> {
         self.write_command(0x0002, &rearm)?; // re-arm
         delay.delay_ms(10);
 
-        Ok(())
+        if !self.get_interrupt_state() {
+            Err(Error::ClearInterruptFailed)
+        } else {
+            Ok(())
+        }
     }
 }
