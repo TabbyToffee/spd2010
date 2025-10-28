@@ -1,6 +1,6 @@
 use embedded_hal::{delay::DelayNs, digital::OutputPin, i2c::I2c};
 
-use crate::touch::{HDPStatus, InterruptInput};
+use crate::touch::{FirmwareInfo, HDPStatus, InterruptInput};
 
 use super::{
     Error, SPD2010_MAX_TOUCH_POINTS, SPD2010Touch, StatusHigh, StatusLow, TouchData, TouchPoint,
@@ -8,7 +8,7 @@ use super::{
 };
 
 impl<'a, I2C: I2c, Ti: InterruptInput> SPD2010Touch<'a, I2C, Ti> {
-    pub fn read_fw_version(&mut self) -> Result<(), Error<I2C>> {
+    pub fn read_fw_version(&mut self) -> Result<FirmwareInfo, Error<I2C>> {
         let mut data: [u8; 18] = [0; 18];
         self.read_register(0x2600, &mut data)?;
         let dummy: u32 = ((data[0] as u32) << 24)
@@ -29,10 +29,13 @@ impl<'a, I2C: I2c, Ti: InterruptInput> SPD2010Touch<'a, I2C, Ti> {
             | ((data[15] as u32) << 8)
             | data[14] as u32;
 
-        // println!(
-        //     "SPD2010 - Dummy: {dummy}, Version: {dver}, PID: {pid}, IC Name: {ic_name_h}-{ic_name_l}"
-        // );
-        Ok(())
+        Ok(FirmwareInfo {
+            dummy,
+            dver,
+            pid,
+            ic_name_l,
+            ic_name_h,
+        })
     }
 
     async fn read_status_length<DELAY: DelayNs>(

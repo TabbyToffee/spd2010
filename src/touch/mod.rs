@@ -18,6 +18,24 @@ pub enum Error<I2C: I2c> {
     ClearInterruptFailed,
 }
 
+pub struct FirmwareInfo {
+    dummy: u32,
+    dver: u16,
+    pid: u32,
+    ic_name_l: u32,
+    ic_name_h: u32,
+}
+
+impl fmt::Display for FirmwareInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "SPD2010 - Dummy: {}, Version: {}, PID: {}, IC Name: {}-{}",
+            self.dummy, self.dver, self.pid, self.ic_name_h, self.ic_name_l
+        )
+    }
+}
+
 // All touches and gesture info
 #[derive(Default, Debug)]
 pub struct TouchData {
